@@ -2,7 +2,7 @@ name: Test env deploy
 
 on:
   pull_request:
-    branches: ["master"]
+    branches: ["main"]
 
 permissions:
   pull-requests: write
@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup python env
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -47,18 +47,20 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.11
+
       - name: Install AWS CDK
         run: npm i -g aws-cdk
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@master
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: "eu-west-2"
 
-      - name: Synth Dev stack
-        run: cdk synth dev-env/ApiKeyServiceStack
-
-      - name: Deploy Dev stack
-        run: cdk deploy dev-env/ApiKeyServiceStack --require-approval never
+      - name: Run deploy script
+        run: ./scripts/deploy.sh dev

@@ -1,7 +1,6 @@
 from aws_cdk import aws_lambda
 from aws_cdk import aws_iam
 from constructs import Construct
-from aws_cdk import BundlingOptions
 
 
 class GenericGoLambdaFunction(aws_lambda.Function):
@@ -14,21 +13,7 @@ class GenericGoLambdaFunction(aws_lambda.Function):
             runtime=aws_lambda.Runtime.PROVIDED_AL2,
             handler="bootstrap",
             code=aws_lambda.Code.from_asset(
-                path=f"apikeyservice/lambdas/{construct_id}",
-                bundling=BundlingOptions(
-                    image=aws_lambda.Runtime.PROVIDED_AL2.bundling_image,
-                    environment={
-                        "GOOS": "linux",
-                        "GOARCH": "amd64",
-                        "CGO_ENABLED": "0",
-                    },
-                    user="root",
-                    command=[
-                        "bash",
-                        "-c",
-                        "go build -tags lambda.norpc -o /asset-output/bootstrap main.go && cd /asset-output && zip function.zip bootstrap",
-                    ],
-                ),
+                path=f"dist/{construct_id}/function.zip",
             ),
             initial_policy=[
                 aws_iam.PolicyStatement(
