@@ -1,19 +1,31 @@
 from aws_cdk import (
-    # Duration,
+    aws_dynamodb,
     Stack,
-    # aws_sqs as sqs,
 )
 from constructs import Construct
+from apikeyservice.lib.lambda_stack import GenericGoLambdaFunction
+from apikeyservice.lib.dynamo import DynamoDBTable
+from apikeyservice.lib.api_gateway import ApiGatewayStack
 
 class ApikeyserviceStack(Stack):
-
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, stage: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
+        DynamoDBTable(
+            self,
+            f"ApiKeyTable{stage}",
+            table_name=f"ApiKeyTable{stage}",
+            partition_key=aws_dynamodb.Attribute(
+                name="api_key_id",
+                type=aws_dynamodb.AttributeType.STRING,
 
-        # example resource
-        # queue = sqs.Queue(
-        #     self, "ApikeyserviceQueue",
-        #     visibility_timeout=Duration.seconds(300),
-        # )
+            ),
+        )
+
+        test_go_lambda = GenericGoLambdaFunction(self, "TestGo", description="Lambda to test go on aws")
+        get_api_key_lambda = GenericGoLambdaFunction(self, "GetApiKey", description="Lambda to get an api key in db")
+
+        api_gateway = ApiGatewayStack(self, "ApiKeyService", stage)
+
+        api_gateway.add_lambda_integration("/test-go", "GET", test_go_lambda)
+        api_gateway.add_lambda_integration("/key", "GET", get_api_key_lambda)
