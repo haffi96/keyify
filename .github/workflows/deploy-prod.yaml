@@ -2,7 +2,7 @@ name: Prod env deploy
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
 
 jobs:
   aws_cdk_deploy:
@@ -27,14 +27,11 @@ jobs:
         run: npm i -g aws-cdk
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@master
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: "eu-west-2"
 
-      - name: Synth Prod stack
-        run: cdk synth prod-env/ApiKeyServiceStack
-
-      - name: Deploy Dev stack
-        run: cdk deploy prod-env/ApiKeyServiceStack --require-approval never
+      - name: Run deploy script
+        run: ./scripts/deploy.sh prod
