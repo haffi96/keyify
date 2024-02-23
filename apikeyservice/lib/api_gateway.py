@@ -1,6 +1,4 @@
 from aws_cdk import aws_apigateway
-from aws_cdk import RemovalPolicy
-from aws_cdk.aws_logs import LogGroup, RetentionDays
 from aws_cdk.aws_lambda import Function
 
 

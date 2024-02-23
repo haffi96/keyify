@@ -1,0 +1,40 @@
+name: Prod env deploy
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  aws_cdk_deploy:
+    name: CDK Prod Deployment
+    if: github.event_name == 'push'
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup python env
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Install AWS CDK
+        run: npm i -g aws-cdk
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: "eu-west-2"
+
+      - name: Synth Prod stack
+        run: cdk synth prod-env/ApiKeyServiceStack
+
+      - name: Deploy Dev stack
+        run: cdk deploy prod-env/ApiKeyServiceStack --require-approval never

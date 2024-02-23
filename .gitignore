@@ -8,3 +8,8 @@ __pycache__
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+.ruff_cache
+.mypy_cache
+
+creds.txt
