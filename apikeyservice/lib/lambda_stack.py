@@ -5,7 +5,11 @@ from constructs import Construct
 
 class GenericGoLambdaFunction(aws_lambda.Function):
     def __init__(
-        self, scope: Construct, construct_id: str, description: str | None
+        self,
+        scope: Construct,
+        construct_id: str,
+        stage: str,
+        description: str | None,
     ) -> None:
         super().__init__(
             scope,
@@ -22,5 +26,6 @@ class GenericGoLambdaFunction(aws_lambda.Function):
                     effect=aws_iam.Effect.ALLOW,
                 )
             ],
+            function_name=f"{construct_id}Lambda{stage}",
             description=description,
         )
