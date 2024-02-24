@@ -1,26 +1,28 @@
 #!/bin/bash
 
-STAGE=$1 # Get stage from script input arguments
+STAGE=$1
+PROJECT_ROOT=$(realpath $(dirname $0)/..)
 
-PROJECT_ROOT=$(realpath $(dirname $0)/..) # Get absolute path to root directory
+function log() {
+    local level="$1"
+    shift
+    printf "[${level}] $(date '+%Y-%m-%d %H:%M:%S') - $STAGE: %s\n" "$@" >&2
+}
 
 function preDeploy() {
-    echo "Building and zipping Go Lambda functions..."
-    mkdir -p dist # Create assets directory if it doesn't exist
+    log INFO "Building and zipping Go Lambda functions..."
+    mkdir -p dist
 
-    LAMBDA_DIR=$(realpath apikeyservice/lambdas) # Get absolute path to root directory
-    DIST_DIR=$(realpath dist)                    # Get absolute path to assets directory
+    LAMBDA_DIR=$(realpath apikeyservice/lambdas)
+    DIST_DIR=$(realpath dist)
 
     for dir in "$LAMBDA_DIR"/**/*.go; do
-        # Extract directory name using dirname:
         dir_name=$(dirname "$dir")
-
         lambda="${dir_name##*/lambdas/}"
 
-        # Change directory using absolute path:
         cd "$dir_name"
+        log INFO "Building Lambda function: $lambda"
 
-        # Build and zip using absolute paths:
         GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o $DIST_DIR/$lambda/bootstrap main.go && cd $DIST_DIR/$lambda && zip function.zip bootstrap
     done
 }
@@ -28,13 +30,13 @@ function preDeploy() {
 function cdkDeploy() {
     preDeploy
 
-    echo "Deploying CDK stack..."
+    log INFO "Deploying CDK stack..."
     cd $PROJECT_ROOT
     cdk deploy $STAGE-env/ApiKeyServiceStack --require-approval never
 
-    echo "CDK stack deployed successfully!"
+    log INFO "CDK stack deployed successfully!"
 
-    echo "Cleaning up..."
+    log INFO "Cleaning up..."
     rm -rf dist
 }
 
