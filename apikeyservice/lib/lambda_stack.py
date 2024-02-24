@@ -15,6 +15,7 @@ class GenericGoLambdaFunction(aws_lambda.Function):
             scope,
             f"{construct_id}Lambda",
             runtime=aws_lambda.Runtime.PROVIDED_AL2,
+            architecture=aws_lambda.Architecture.ARM_64,
             handler="bootstrap",
             code=aws_lambda.Code.from_asset(
                 path=f"dist/{construct_id}/function.zip",
