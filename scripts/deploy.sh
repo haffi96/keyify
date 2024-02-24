@@ -21,7 +21,7 @@ function preDeploy() {
         cd "$dir_name"
 
         # Build and zip using absolute paths:
-        go build -tags lambda.norpc -o $DIST_DIR/$lambda/bootstrap main.go && cd $DIST_DIR/$lambda && zip function.zip bootstrap
+        GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags lambda.norpc -o $DIST_DIR/$lambda/bootstrap main.go && cd $DIST_DIR/$lambda && zip function.zip bootstrap
     done
 }
 
