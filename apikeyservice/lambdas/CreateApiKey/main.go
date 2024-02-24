@@ -196,6 +196,6 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	// Return a success response with masked key
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       fmt.Sprintf(`{"keyId": "%s"}`, strings.TrimPrefix(apiKeyToAdd.KeyId, "apiKeyId#")),
+		Body:       fmt.Sprintf(`{"keyId": "%s", "key": "%s"}`, strings.TrimPrefix(apiKeyToAdd.KeyId, "apiKeyId#"), req.Prefix+apiKey),
 	}, nil
 }
