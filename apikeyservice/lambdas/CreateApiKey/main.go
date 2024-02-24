@@ -51,6 +51,7 @@ type CreateKeyRequest struct {
 
 // API response structure
 type CreateKeyResponse struct {
+	ApiId string `json:"apiId"`
 	KeyId string `json:"keyId"`
 	Key   string `json:"key"` // **Do not return the actual API key**
 }
@@ -193,9 +194,21 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		return errorResponse(http.StatusInternalServerError, "Error adding key to DynamoDB: %s", err.Error())
 	}
 
+	respBody := CreateKeyResponse{
+		ApiId: apiKeyToAdd.ApiId,
+		KeyId: strings.TrimPrefix(apiKeyToAdd.KeyId, "apiKeyId#"),
+		Key:   req.Prefix + apiKey,
+	}
+
+	// Marshal the response body
+	respBodyJSON, err := json.Marshal(respBody)
+	if err != nil {
+		return errorResponse(http.StatusInternalServerError, "Error marshalling response: %s", err.Error())
+	}
+
 	// Return a success response with masked key
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       fmt.Sprintf(`{"keyId": "%s", "key": "%s"}`, strings.TrimPrefix(apiKeyToAdd.KeyId, "apiKeyId#"), req.Prefix+apiKey),
+		Body:       fmt.Sprintf("%v", respBodyJSON),
 	}, nil
 }

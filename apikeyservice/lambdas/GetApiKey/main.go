@@ -16,8 +16,7 @@ import (
 type apiKeyIdRow struct {
 	ApiId     string   `json:"apiId" dynamodbav:"pk"`
 	KeyId     string   `json:"apiKeyId" dynamodbav:"sk"`
-	HashedKey string   `json:"-" dynamodbav:"hashedKey"` // Store hashed key securely
-	ApiKey    string   `json:"key" dynamodbav:"-"`       // Not used, store hashed key instead
+	HashedKey string   `json:"-" dynamodbav:"hashedKey,omitempty"` // Store hashed key securely
 	Name      string   `json:"name,omitempty" dynamodbav:"name,omitempty"`
 	Prefix    string   `json:"prefix,omitempty" dynamodbav:"prefix,omitempty"`
 	Roles     []string `json:"roles,omitempty" dynamodbav:"roles,omitempty"`
