@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -107,7 +108,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		Prefix: apiKeyData.Prefix,
 		Roles:  apiKeyData.Roles,
 	}
-	respBodyJSON, err := attributevalue.MarshalMap(respBody)
+	respBodyJSON, err := json.Marshal(respBody)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -118,7 +119,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       fmt.Sprintf("%v", respBodyJSON),
+		Body:       string(respBodyJSON),
 	}, nil
 
 }

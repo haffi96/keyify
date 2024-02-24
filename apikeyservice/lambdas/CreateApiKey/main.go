@@ -209,6 +209,6 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	// Return a success response with masked key
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       fmt.Sprintf("%v", respBodyJSON),
+		Body:       string(respBodyJSON),
 	}, nil
 }
