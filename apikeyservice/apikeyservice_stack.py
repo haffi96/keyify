@@ -45,6 +45,13 @@ class ApikeyserviceStack(Stack):
             description="Lambda to create an api key in db",
         )
 
+        verify_api_key_lambda = GenericGoLambdaFunction(
+            self,
+            "VerifyApiKey",
+            stage=stage,
+            description="Lambda to verify an api key in db",
+        )
+
         api_gateway = ApiGatewayStack(
             self,
             "ApiKeyService",
@@ -55,4 +62,7 @@ class ApikeyserviceStack(Stack):
         api_gateway.add_lambda_integration("/key", "GET", get_api_key_lambda)
         api_gateway.add_lambda_integration(
             "/key", "POST", create_api_key_lambda
+        )
+        api_gateway.add_lambda_integration(
+            "/verifyKey", "POST", verify_api_key_lambda
         )

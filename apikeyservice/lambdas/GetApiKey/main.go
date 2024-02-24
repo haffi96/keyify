@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -11,47 +14,116 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-type ApiKey struct {
-	ApiKeyId string `json:"api_key_id" dynamodbav:"api_key_id"`
+type apiKeyIdRow struct {
+	ApiId     string   `json:"apiId" dynamodbav:"pk"`
+	KeyId     string   `json:"apiKeyId" dynamodbav:"sk"`
+	HashedKey string   `json:"-" dynamodbav:"hashedKey,omitempty"` // Store hashed key securely
+	Name      string   `json:"name,omitempty" dynamodbav:"name,omitempty"`
+	Prefix    string   `json:"prefix,omitempty" dynamodbav:"prefix,omitempty"`
+	Roles     []string `json:"roles,omitempty" dynamodbav:"roles,omitempty"`
 }
 
-func HandleRequest(ctx context.Context) (string, error) {
-	// Using the SDK's default configuration, loading additional config
-	// and credentials values from the environment variables, shared
-	// credentials, and shared configuration files
+type GetApiKeyResponse struct {
+	ApiId  string   `json:"apiId"`
+	KeyId  string   `json:"apiKeyId"`
+	Name   string   `json:"name,omitempty"`
+	Prefix string   `json:"prefix,omitempty"`
+	Roles  []string `json:"roles,omitempty"`
+}
+
+func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Parse API ID and key ID from request parameters
+	apiId := request.QueryStringParameters["apiId"]
+	keyId := request.QueryStringParameters["apiKeyId"]
+
+	if apiId == "" || keyId == "" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       "Missing required query parameters: apiId and apiKeyId",
+		}, nil
+	}
+
+	// Configure AWS SDK client
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("eu-west-2"),
+		config.WithRegion("eu-west-2"), // Replace with your region
 	)
 	if err != nil {
-		return "", fmt.Errorf("unable to load SDK config: %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       fmt.Sprintf("Error loading SDK config: %v", err),
+		}, nil
 	}
 
-	// Using the Config value, create the DynamoDB client
 	svc := dynamodb.NewFromConfig(cfg)
 
-	key := ApiKey{
-		ApiKeyId: "5cb67f61-4577-4f22-9fc2-ed91486dced5",
+	// Construct DynamoDB key
+	key := apiKeyIdRow{
+		ApiId: "apiId#" + apiId,
+		KeyId: "apiKeyId#" + keyId,
 	}
 
-	k, err := attributevalue.MarshalMap(key)
+	keyJson, err := attributevalue.MarshalMap(key)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       fmt.Sprintf("Error marshalling key: %v", err),
+		}, nil
+	}
+
+	// Get item from DynamoDB
+	getItemInput := &dynamodb.GetItemInput{
+		TableName: aws.String("ApiKeyTableDev"), // Replace with your table name
+		Key:       keyJson,
+	}
+
+	result, err := svc.GetItem(context.TODO(), getItemInput)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       fmt.Sprintf("Error getting item from DynamoDB: %v", err),
+		}, nil
+	}
+
+	// Check if key exists and return 404 if not found
+	if result.Item == nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusNotFound,
+			Body:       "API key not found",
+		}, nil
+	}
+
+	// Extract and return relevant data (excluding sensitive fields)
+	apiKeyData := apiKeyIdRow{}
+	err = attributevalue.UnmarshalMap(result.Item, &apiKeyData)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+		}, nil
+	}
+
+	respBody := GetApiKeyResponse{
+		ApiId:  apiId,
+		KeyId:  keyId,
+		Name:   apiKeyData.Name,
+		Prefix: apiKeyData.Prefix,
+		Roles:  apiKeyData.Roles,
+	}
+	respBodyJSON, err := json.Marshal(respBody)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal Record, %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       fmt.Sprintf("Error marshalling response: %v", err),
+		}, nil
 	}
 
-	// Build the request with its input parameters
-	resp, err := svc.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		TableName: aws.String("ApiKeyTableDev"),
-		Key:       k,
-	})
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(respBodyJSON),
+	}, nil
 
-	if err != nil {
-		return "", fmt.Errorf("failed to get item: %v", err)
-	}
-
-	return fmt.Sprintf("Item: %v", resp.Item), nil
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	lambda.Start(handler)
 }
