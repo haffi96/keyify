@@ -64,5 +64,5 @@ class ApikeyserviceStack(Stack):
             "/key", "POST", create_api_key_lambda
         )
         api_gateway.add_lambda_integration(
-            "/key", "POST", verify_api_key_lambda
+            "/verifyKey", "POST", verify_api_key_lambda
         )
