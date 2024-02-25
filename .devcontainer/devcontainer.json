@@ -1,0 +1,8 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/python:0-3.11-bullseye",
+	"features": {
+		"ghcr.io/devcontainers/features/aws-cli:1": {},
+		"ghcr.io/devcontainers-contrib/features/aws-cdk:2": {}
+	},
+	"postCreateCommand": "pip install -r requirements.txt -r requirements-dev.txt"
+}
