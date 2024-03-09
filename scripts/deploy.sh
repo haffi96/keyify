@@ -13,7 +13,7 @@ function preDeploy() {
     log INFO "Building and zipping Go Lambda functions..."
     mkdir -p dist
 
-    LAMBDA_DIR=$(realpath apikeyservice/lambdas)
+    LAMBDA_DIR=$(realpath src/lambdas)
     DIST_DIR=$(realpath dist)
 
     for dir in "$LAMBDA_DIR"/**/*.go; do
@@ -23,7 +23,7 @@ function preDeploy() {
         cd "$dir_name"
         log INFO "Building Lambda function: $lambda"
 
-        GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o $DIST_DIR/$lambda/bootstrap main.go && cd $DIST_DIR/$lambda && zip function.zip bootstrap
+        GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o $DIST_DIR/$lambda/bootstrap handler.go && cd $DIST_DIR/$lambda && zip function.zip bootstrap
     done
 }
 
@@ -36,8 +36,8 @@ function cdkDeploy() {
 
     log INFO "CDK stack deployed successfully!"
 
-    log INFO "Cleaning up..."
-    rm -rf dist
+    # log INFO "Cleaning up..."
+    # rm -rf dist
 }
 
 cdkDeploy

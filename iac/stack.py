@@ -3,9 +3,9 @@ from aws_cdk import (
     Stack,
 )
 from constructs import Construct
-from apikeyservice.lib.lambda_stack import GenericGoLambdaFunction
-from apikeyservice.lib.dynamo import DynamoDBTable
-from apikeyservice.lib.api_gateway import ApiGatewayStack
+from iac.resources.generic_lambda import GenericGoLambdaFunction
+from iac.resources.dynamo import DynamoDBTable
+from iac.resources.api_gateway import ApiGatewayStack
 
 
 class ApikeyserviceStack(Stack):
