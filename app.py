@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import aws_cdk as cdk
 
-from apikeyservice.apikeyservice_stack import ApikeyserviceStack
+from iac.stack import ApikeyserviceStack
 from settings import settings
 
 app = cdk.App()
