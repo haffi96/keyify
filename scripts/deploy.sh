@@ -1,6 +1,11 @@
 #!/bin/bash
 
 STAGE=$1
+if [ "$2" == "--local" ]; then
+    LOCAL=true
+else
+    LOCAL=false
+fi
 PROJECT_ROOT=$(realpath $(dirname $0)/..)
 
 function log() {
@@ -32,12 +37,22 @@ function cdkDeploy() {
 
     log INFO "Deploying CDK stack..."
     cd $PROJECT_ROOT
-    cdk deploy $STAGE-env/ApiKeyServiceStack --require-approval never
+    if [ "$LOCAL" = "true" ]; then
+        log INFO "Deploying locally..."
+
+        log INFO "Bootstrapping localstack..."
+        CDK_ACCOUNT=000000000000 cdklocal bootstrap
+
+        log INFO "Deploying CDK stack to localstack..."
+        CDK_ACCOUNT=000000000000 cdklocal deploy dev-env/ApiKeyServiceStack --require-approval never
+    else
+        cdk deploy $STAGE-env/ApiKeyServiceStack --require-approval never
+    fi
 
     log INFO "CDK stack deployed successfully!"
 
-    # log INFO "Cleaning up..."
-    # rm -rf dist
+    log INFO "Cleaning up..."
+    rm -rf dist
 }
 
 cdkDeploy

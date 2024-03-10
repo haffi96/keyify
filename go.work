@@ -5,4 +5,5 @@ use (
 	./src/schemas
 	./src/db
 	./src/utils
+	./src/cfg
 )
