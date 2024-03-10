@@ -3,6 +3,8 @@ package db
 import (
 	"context"
 
+	"cfg"
+
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
@@ -10,7 +12,7 @@ import (
 func GetDynamoClient(ctx context.Context) *dynamodb.Client {
 	// Configure AWS SDK client
 	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion("eu-west-2"), // Replace with your region
+		config.WithRegion(cfg.Config.AwsRegion), // Replace with your region
 	)
 	if err != nil {
 		panic("Failed to load aws sdk config, " + err.Error())

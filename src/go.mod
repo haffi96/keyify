@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.50.35 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/dynamodbstreams v1.20.0 // indirect

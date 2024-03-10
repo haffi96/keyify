@@ -8,8 +8,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  tests:
-    name: Tests
+  pre-checks:
+    name: Static checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,9 +29,52 @@ jobs:
 
       - name: Mypy check
         run: mypy .
+  unit-test:
+    name: 'Unit tests - Localstack'
+    runs-on: ubuntu-latest
+    env:
+      CDK_REGION: eu-west-2
+      CDK_ACCOUNT: 000000000000
+      STACK_NAME: dev-env/ApiKeyServiceStac
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start LocalStack
+        uses: LocalStack/setup-localstack@main
+        with:
+          image-tag: 'latest'
+          install-awslocal: 'true'
+
+      - name: Setup python env
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.11
+
+      - name: Install aws-cdk-local
+        run: npm install -g aws-cdk-local aws-cdk
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run deploy script for local
+        run: ./scripts/deploy.sh dev --local
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'src/go.mod'
+          cache-dependency-path: 'src/go.sum'
+
+
+      - name: Run unit tests
+        run: go test ./src/lambdas/...
   aws_cdk_test_deploy:
     name: CDK Test Deployment
-    needs: [tests]
+    needs: [pre-checks, unit-test]
     environment: preview
     runs-on: ubuntu-latest
     steps:
