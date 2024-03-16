@@ -12,3 +12,8 @@ type VerifyKeyRequest struct {
 	ApiId string `json:"apiId"`
 	Key   string `json:"key"`
 }
+type CreateRootKeyRequest struct {
+	WorkspaceId string   `json:"workspaceId"`
+	Name        string   `json:"name,omitempty"`
+	Permissions []string `json:"permissions,omitempty"`
+}

@@ -1,7 +1,4 @@
-from aws_cdk import (
-    aws_dynamodb,
-    Stack,
-)
+from aws_cdk import aws_dynamodb, Stack
 from constructs import Construct
 from iac.resources.generic_lambda import GenericGoLambdaFunction
 from iac.resources.dynamo import DynamoDBTable
@@ -32,6 +29,12 @@ class ApikeyserviceStack(Stack):
             stage=stage,
             description="Lambda to test go on aws",
         )
+        create_root_key_lambda = GenericGoLambdaFunction(
+            self,
+            "CreateRootKey",
+            stage=stage,
+            description="Lambda to create a root key in db",
+        )
         get_api_key_lambda = GenericGoLambdaFunction(
             self,
             "GetApiKey",
@@ -59,6 +62,9 @@ class ApikeyserviceStack(Stack):
         )
 
         api_gateway.add_lambda_integration("/test-go", "GET", test_go_lambda)
+        api_gateway.add_lambda_integration(
+            "/rootKey", "PUT", create_root_key_lambda
+        )
         api_gateway.add_lambda_integration("/key", "GET", get_api_key_lambda)
         api_gateway.add_lambda_integration(
             "/key", "POST", create_api_key_lambda

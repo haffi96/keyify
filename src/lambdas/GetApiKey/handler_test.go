@@ -22,6 +22,15 @@ func TestGetApiKeyHandler(t *testing.T) {
 		TableName: cfg.Config.ApiKeyTable,
 	}
 
+	// Create rootKey row for testing
+	rootKey, _ := utils.GenerateApiKey("apikeyservice_")
+	hashedKey := utils.HashString(rootKey)
+	workspaceId := "workspace-2"
+	rootKeyReq := schemas.CreateRootKeyRequest{
+		WorkspaceId: workspaceId,
+	}
+	db.CreateRootKeyRow(hashedKey, rootKeyReq, d.DbClient)
+
 	// Create a test API key
 	req := schemas.CreateKeyRequest{
 		ApiId:  "api" + gofakeit.UUID(),
@@ -30,10 +39,13 @@ func TestGetApiKeyHandler(t *testing.T) {
 		Roles:  []string{"admin", "user"},
 	}
 	apiKeyId := utils.GenerateKeyId()
-	db.CreateApiKeyRow(utils.HashString("key_1234"), apiKeyId, req, d.DbClient)
+	db.CreateApiKeyRow(utils.HashString("key_1234"), workspaceId, apiKeyId, req, d.DbClient)
 
 	// Test the handler
 	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
+		Headers: map[string]string{
+			"Authorization": "Bearer " + rootKey,
+		},
 		QueryStringParameters: map[string]string{
 			"apiId":    req.ApiId,
 			"apiKeyId": apiKeyId,

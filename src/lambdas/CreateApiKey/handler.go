@@ -1,10 +1,12 @@
 package main
 
 import (
+	"auth"
 	"context"
 	"db"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"utils"
@@ -28,6 +30,13 @@ func main() {
 }
 
 func (d *CreateApiKeyDeps) handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Verify the request authentication
+	workspaceId, err := auth.VerifyAuthHeader(event, d.DbClient)
+	if err != nil {
+		return utils.HttpErrorResponse(http.StatusUnauthorized, fmt.Sprintf("Unauthorized: %s", err.Error())), nil
+	}
+	log.Printf("workspaceId: %s", workspaceId)
+
 	// Parse and validate request body
 	var req schemas.CreateKeyRequest
 	if err := json.Unmarshal([]byte(event.Body), &req); err != nil {
@@ -53,19 +62,19 @@ func (d *CreateApiKeyDeps) handler(ctx context.Context, event events.APIGatewayP
 	keyId := utils.GenerateKeyId()
 
 	// Create ApiKey struct
-	apiKeyToAdd, err := db.CreateApiKeyRow(hashedKey, keyId, req, d.DbClient)
+	apiKeyToAdd, err := db.CreateApiKeyRow(hashedKey, workspaceId, keyId, req, d.DbClient)
 	if err != nil {
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error adding key to DynamoDB: %s", err.Error())), nil
 	}
 
 	// Create HashedKey struct
-	err = db.CreateHashedKeyRow(hashedKey, keyId, req, d.DbClient)
+	err = db.CreateHashedKeyRow(hashedKey, workspaceId, keyId, req, d.DbClient)
 	if err != nil {
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error adding key to DynamoDB: %s", err.Error())), nil
 	}
 
 	respBody := schemas.CreateKeyResponse{
-		ApiId: strings.TrimPrefix(apiKeyToAdd.ApiId, "apiId#"),
+		ApiId: strings.TrimPrefix(apiKeyToAdd.WorkspaceIdApiId, "workspaceId#"+workspaceId+"-apiId#"),
 		KeyId: strings.TrimPrefix(apiKeyToAdd.KeyId, "apiKeyId#"),
 		Key:   apiKey,
 	}
