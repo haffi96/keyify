@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cfg"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 
 	"db"
 	"schemas"
+	"src"
 	"utils"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -17,24 +19,23 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-type deps struct {
-	ddbClient *dynamodb.Client
-}
+type GetApiKeyDeps src.Deps
 
 func main() {
-	d := deps{
-		ddbClient: db.GetDynamoClient(context.Background()),
+	d := GetApiKeyDeps{
+		DbClient:  db.GetDynamoClient(context.Background()),
+		TableName: cfg.Config.ApiKeyTable,
 	}
 	lambda.Start(d.handler)
 }
 
-func (d *deps) handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (d *GetApiKeyDeps) handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Parse API ID and key ID from request parameters
 	apiId := request.QueryStringParameters["apiId"]
 	keyId := request.QueryStringParameters["apiKeyId"]
 
 	if apiId == "" || keyId == "" {
-		return utils.HttpErrorResponse(http.StatusBadRequest, "Missing required query parameters: apiId and apiKeyId")
+		return utils.HttpErrorResponse(http.StatusBadRequest, "Missing required query parameters: apiId and apiKeyId"), nil
 	}
 
 	// Construct DynamoDB key
@@ -45,30 +46,30 @@ func (d *deps) handler(ctx context.Context, request events.APIGatewayProxyReques
 
 	keyJson, err := attributevalue.MarshalMap(key)
 	if err != nil {
-		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error marshalling key: %v", err))
+		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error marshalling key: %v", err)), nil
 	}
 
 	// Get item from DynamoDB
 	getItemInput := &dynamodb.GetItemInput{
-		TableName: aws.String("ApiKeyTableDev"), // Replace with your table name
+		TableName: aws.String(d.TableName),
 		Key:       keyJson,
 	}
 
-	result, err := d.ddbClient.GetItem(context.TODO(), getItemInput)
+	result, err := d.DbClient.GetItem(context.TODO(), getItemInput)
 	if err != nil {
-		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error getting item from DynamoDB: %v", err))
+		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error getting item from DynamoDB: %v", err)), nil
 	}
 
 	// Check if key exists and return 404 if not found
 	if result.Item == nil {
-		return utils.HttpErrorResponse(http.StatusNotFound, "API key not found")
+		return utils.HttpErrorResponse(http.StatusNotFound, "API key not found"), nil
 	}
 
 	// Extract and return relevant data (excluding sensitive fields)
 	apiKeyData := schemas.ApiKeyIdRow{}
 	err = attributevalue.UnmarshalMap(result.Item, &apiKeyData)
 	if err != nil {
-		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error unmarshalling item: %v", err))
+		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error unmarshalling item: %v", err)), nil
 	}
 
 	respBody := schemas.GetApiKeyResponse{
@@ -81,7 +82,7 @@ func (d *deps) handler(ctx context.Context, request events.APIGatewayProxyReques
 	respBodyJSON, err := json.Marshal(respBody)
 
 	if err != nil {
-		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error marshalling response: %v", err))
+		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error marshalling response: %v", err)), nil
 	}
 
 	return events.APIGatewayProxyResponse{

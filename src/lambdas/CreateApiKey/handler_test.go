@@ -6,17 +6,18 @@ import (
 	"strings"
 	"testing"
 
+	"cfg"
 	"db"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandler(t *testing.T) {
+func TestCreateApiKeyHandler(t *testing.T) {
 	ctx := context.Background()
-	d := deps{
-		ddbClient: db.GetMockDynamoClient(ctx),
-		tableName: "ApiKeyTableDev",
+	d := CreateApiKeyDeps{
+		DbClient:  db.GetMockDynamoClient(ctx),
+		TableName: cfg.Config.ApiKeyTable,
 	}
 
 	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
@@ -31,7 +32,7 @@ func TestHandler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to parse response body: %v", err)
 	}
-	assert.Equal(t, "apiId#api-1", result["apiId"], "Expected apiId to be api-1")
+	assert.Equal(t, "api-1", result["apiId"], "Expected apiId to be api-1")
 
 	// Assert prefix of the key
 	key := result["key"].(string)
