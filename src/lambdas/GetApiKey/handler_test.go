@@ -1,0 +1,59 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"schemas"
+	"testing"
+	"utils"
+
+	"cfg"
+	"db"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestGetApiKeyHandler(t *testing.T) {
+	ctx := context.Background()
+	d := GetApiKeyDeps{
+		DbClient:  db.GetMockDynamoClient(ctx),
+		TableName: cfg.Config.ApiKeyTable,
+	}
+
+	// Create a test API key
+	req := schemas.CreateKeyRequest{
+		ApiId:  "api" + gofakeit.UUID(),
+		Name:   gofakeit.FirstName() + "'s test key",
+		Prefix: "test_",
+		Roles:  []string{"admin", "user"},
+	}
+	apiKeyId := utils.GenerateKeyId()
+	db.CreateApiKeyRow(utils.HashString("key_1234"), apiKeyId, req, d.DbClient)
+
+	// Test the handler
+	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
+		QueryStringParameters: map[string]string{
+			"apiId":    req.ApiId,
+			"apiKeyId": apiKeyId,
+		},
+	})
+
+	// Verify the response
+	assert.Equal(t, nil, err, "Handler returned an error")
+	assert.Equal(t, 200, resp.StatusCode, "Expected status code 200")
+
+	var result map[string]interface{}
+	err = json.Unmarshal([]byte(resp.Body), &result)
+	if err != nil {
+		t.Fatalf("Unable to parse response body: %v", err)
+	}
+
+	assert.Equal(t, apiKeyId, result["apiKeyId"], "Expected keyId to be key_1234")
+	assert.Equal(t, req.ApiId, result["apiId"], "Expected apiId to be api-1234")
+	assert.Equal(t, req.Name, result["name"], "Expected name to be my test key")
+	assert.Equal(t, "test_", result["prefix"], "Expected prefix to be test_")
+	assert.Equal(t, []interface{}{"admin", "user"}, result["roles"], "Expected roles to be [admin, user]")
+
+}

@@ -1,9 +1,11 @@
 package cfg
 
 type Settings struct {
-	AwsRegion string
+	AwsRegion   string
+	ApiKeyTable string
 }
 
 var Config = Settings{
-	AwsRegion: "eu-west-2",
+	AwsRegion:   "eu-west-2",
+	ApiKeyTable: "ApiKeyTableDev",
 }
