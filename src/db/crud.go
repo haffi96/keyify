@@ -3,6 +3,7 @@ package db
 import (
 	"cfg"
 	"context"
+	"errors"
 	"fmt"
 	"schemas"
 
@@ -107,6 +108,10 @@ func GetRootKeyRow(rootKeyHash string, dbClient *dynamodb.Client) (schemas.RootK
 	getRootKeyOutput, err := dbClient.Query(context.TODO(), getRootKeyInput)
 	if err != nil {
 		return schemas.RootKeyRow{}, err
+	}
+
+	if len(getRootKeyOutput.Items) == 0 {
+		return schemas.RootKeyRow{}, errors.New("root key invalid")
 	}
 
 	rootKey := schemas.RootKeyRow{}

@@ -9,6 +9,7 @@ class GenericGoLambdaFunction(aws_lambda.Function):
         scope: Construct,
         construct_id: str,
         stage: str,
+        code_source: aws_lambda.Code,
         description: str | None,
     ) -> None:
         super().__init__(
@@ -17,9 +18,7 @@ class GenericGoLambdaFunction(aws_lambda.Function):
             runtime=aws_lambda.Runtime.PROVIDED_AL2,
             architecture=aws_lambda.Architecture.ARM_64,
             handler="bootstrap",
-            code=aws_lambda.Code.from_asset(
-                path=f"dist/{construct_id}/function.zip",
-            ),
+            code=code_source,
             initial_policy=[
                 aws_iam.PolicyStatement(
                     actions=["dynamodb:*"],

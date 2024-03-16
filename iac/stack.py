@@ -1,8 +1,8 @@
 from aws_cdk import aws_dynamodb, Stack
 from constructs import Construct
-from iac.resources.generic_lambda import GenericGoLambdaFunction
 from iac.resources.dynamo import DynamoDBTable
 from iac.resources.api_gateway import ApiGatewayStack
+from iac.resources.router import ApiKeyServiceRouter
 
 
 class ApikeyserviceStack(Stack):
@@ -23,52 +23,8 @@ class ApikeyserviceStack(Stack):
             ),
         )
 
-        test_go_lambda = GenericGoLambdaFunction(
-            self,
-            "TestGo",
-            stage=stage,
-            description="Lambda to test go on aws",
-        )
-        create_root_key_lambda = GenericGoLambdaFunction(
-            self,
-            "CreateRootKey",
-            stage=stage,
-            description="Lambda to create a root key in db",
-        )
-        get_api_key_lambda = GenericGoLambdaFunction(
-            self,
-            "GetApiKey",
-            stage=stage,
-            description="Lambda to get an api key in db",
-        )
-        create_api_key_lambda = GenericGoLambdaFunction(
-            self,
-            "CreateApiKey",
-            stage=stage,
-            description="Lambda to create an api key in db",
-        )
+        api_gateway = ApiGatewayStack(self, "ApiKeyService", stage=stage)
 
-        verify_api_key_lambda = GenericGoLambdaFunction(
-            self,
-            "VerifyApiKey",
-            stage=stage,
-            description="Lambda to verify an api key in db",
-        )
-
-        api_gateway = ApiGatewayStack(
-            self,
-            "ApiKeyService",
-            stage,
-        )
-
-        api_gateway.add_lambda_integration("/test-go", "GET", test_go_lambda)
-        api_gateway.add_lambda_integration(
-            "/rootKey", "PUT", create_root_key_lambda
-        )
-        api_gateway.add_lambda_integration("/key", "GET", get_api_key_lambda)
-        api_gateway.add_lambda_integration(
-            "/key", "POST", create_api_key_lambda
-        )
-        api_gateway.add_lambda_integration(
-            "/verifyKey", "POST", verify_api_key_lambda
+        ApiKeyServiceRouter(
+            self, "ApiRouter", stage=stage, api_gateway=api_gateway
         )
