@@ -45,7 +45,7 @@ func (d *CreateApiKeyDeps) handler(ctx context.Context, event events.APIGatewayP
 
 	// Parse and validate request body
 	if req.ApiId == "" {
-		return utils.HttpErrorResponse(http.StatusBadRequest, fmt.Sprintf("Missing required field: %s", req.ApiId)), nil
+		return utils.HttpErrorResponse(http.StatusBadRequest, "Missing required field: apiId"), nil
 	}
 	// ... Add more validations as needed
 

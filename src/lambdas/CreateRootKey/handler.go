@@ -35,7 +35,7 @@ func (d *CreateRootKeyDeps) handler(ctx context.Context, event events.APIGateway
 
 	// Parse and validate request body
 	if req.WorkspaceId == "" {
-		return utils.HttpErrorResponse(http.StatusBadRequest, fmt.Sprintf("Missing required field: %s", req.WorkspaceId)), nil
+		return utils.HttpErrorResponse(http.StatusBadRequest, "Missing required field: workspaceId"), nil
 	}
 	// ... Add more validations as needed
 

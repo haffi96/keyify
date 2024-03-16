@@ -9,7 +9,7 @@ class ApiGatewayStack(aws_apigateway.RestApi):
     def __init__(self, scope: Construct, construct_id: str, stage: str) -> None:
         super().__init__(
             scope,
-            f"{construct_id}ApiGateway",
+            construct_id,
             rest_api_name=f"{construct_id}ApiGateway{stage}",
             # cloud_watch_role=True,
             # deploy_options=aws_apigateway.StageOptions(
