@@ -6,4 +6,5 @@ use (
 	./src/db
 	./src/utils
 	./src/cfg
+	./src/auth
 )

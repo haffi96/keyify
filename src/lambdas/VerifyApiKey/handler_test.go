@@ -16,12 +16,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetApiKeyHandler(t *testing.T) {
+func TestVerifyApiKeyHandler(t *testing.T) {
 	ctx := context.Background()
 	d := VerifyKeyDeps{
 		DbClient:  db.GetMockDynamoClient(ctx),
 		TableName: cfg.Config.ApiKeyTable,
 	}
+
+	// Create rootKey row for testing
+	rootKey, _ := utils.GenerateApiKey("apikeyservice_")
+	hashedKey := utils.HashString(rootKey)
+	workspaceId := "workspace-3"
+	rootKeyReq := schemas.CreateRootKeyRequest{
+		WorkspaceId: workspaceId,
+	}
+	db.CreateRootKeyRow(hashedKey, rootKeyReq, d.DbClient)
 
 	// Create a test API hasked key row
 	req := schemas.CreateKeyRequest{
@@ -32,10 +41,13 @@ func TestGetApiKeyHandler(t *testing.T) {
 	}
 	apiKeyId := utils.GenerateKeyId()
 	apiKey, _ := utils.GenerateApiKey(req.Prefix)
-	db.CreateHashedKeyRow(utils.HashString(apiKey), apiKeyId, req, d.DbClient)
+	db.CreateHashedKeyRow(utils.HashString(apiKey), workspaceId, apiKeyId, req, d.DbClient)
 
 	// Test the handler
 	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
+		Headers: map[string]string{
+			"Authorization": "Bearer " + rootKey,
+		},
 		Body: fmt.Sprintf(`{"apiId": "%s", "key": "%s"}`, req.ApiId, apiKey),
 	})
 

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"auth"
 	"cfg"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"db"
@@ -30,6 +32,13 @@ func main() {
 }
 
 func (d *GetApiKeyDeps) handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Verify the request authentication
+	workspaceId, err := auth.VerifyAuthHeader(request, d.DbClient)
+	if err != nil {
+		return utils.HttpErrorResponse(http.StatusUnauthorized, fmt.Sprintf("Unauthorized: %s", err.Error())), nil
+	}
+	log.Printf("workspaceId: %s", workspaceId)
+
 	// Parse API ID and key ID from request parameters
 	apiId := request.QueryStringParameters["apiId"]
 	keyId := request.QueryStringParameters["apiKeyId"]
@@ -40,8 +49,8 @@ func (d *GetApiKeyDeps) handler(ctx context.Context, request events.APIGatewayPr
 
 	// Construct DynamoDB key
 	key := schemas.GetApiKeyInput{
-		ApiId: "apiId#" + apiId,
-		KeyId: "apiKeyId#" + keyId,
+		WorkspaceIdApiId: "workspaceId#" + workspaceId + "-" + "apiId#" + apiId,
+		KeyId:            "apiKeyId#" + keyId,
 	}
 
 	keyJson, err := attributevalue.MarshalMap(key)

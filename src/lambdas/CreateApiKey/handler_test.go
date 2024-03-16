@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"schemas"
 	"strings"
 	"testing"
+	"utils"
 
 	"cfg"
 	"db"
@@ -20,7 +22,18 @@ func TestCreateApiKeyHandler(t *testing.T) {
 		TableName: cfg.Config.ApiKeyTable,
 	}
 
+	// Create rootKey row for testing
+	rootKey, _ := utils.GenerateApiKey("apikeyservice_")
+	hashedKey := utils.HashString(rootKey)
+	rootKeyReq := schemas.CreateRootKeyRequest{
+		WorkspaceId: "workspace-1",
+	}
+	db.CreateRootKeyRow(hashedKey, rootKeyReq, d.DbClient)
+
 	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
+		Headers: map[string]string{
+			"Authorization": "Bearer " + rootKey,
+		},
 		Body: `{"apiId":"api-1","name":"key-1","prefix":"key_","roles":["role-1","role-2"]}`,
 	})
 

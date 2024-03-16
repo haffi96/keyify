@@ -1,9 +1,11 @@
 package main
 
 import (
+	"auth"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"cfg"
@@ -30,6 +32,13 @@ func main() {
 }
 
 func (d *VerifyKeyDeps) handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Verify the request authentication
+	workspaceId, err := auth.VerifyAuthHeader(event, d.DbClient)
+	if err != nil {
+		return utils.HttpErrorResponse(http.StatusUnauthorized, fmt.Sprintf("Unauthorized: %s", err.Error())), nil
+	}
+	log.Printf("workspaceId: %s", workspaceId)
+
 	// Parse and validate request body
 	var req schemas.VerifyKeyRequest
 	if err := json.Unmarshal([]byte(event.Body), &req); err != nil {
@@ -44,8 +53,8 @@ func (d *VerifyKeyDeps) handler(ctx context.Context, event events.APIGatewayProx
 	hashedKey := utils.HashString(req.Key)
 
 	key := schemas.VerifyHashedKeyInput{
-		ApiId:     "apiId#" + req.ApiId,
-		HashedKey: "hashedKey#" + hashedKey,
+		WorkspaceIdApiId: "workspaceId#" + workspaceId + "-" + "apiId#" + req.ApiId,
+		HashedKey:        "hashedKey#" + hashedKey,
 	}
 
 	keyJson, err := attributevalue.MarshalMap(key)
