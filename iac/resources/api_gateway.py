@@ -11,7 +11,15 @@ class ApiGatewayStack(aws_apigateway.RestApi):
             scope,
             construct_id,
             rest_api_name=f"{construct_id}ApiGateway{stage}",
-            # cloud_watch_role=True,
+            deploy=True,
+            cloud_watch_role=True,
+            deploy_options=aws_apigateway.StageOptions(
+                stage_name=stage,
+                logging_level=aws_apigateway.MethodLoggingLevel.INFO,
+                data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
+            ),
             # deploy_options=aws_apigateway.StageOptions(
             #     access_log_destination=aws_apigateway.LogGroupLogDestination(
             #         LogGroup(
