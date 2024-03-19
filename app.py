@@ -29,13 +29,13 @@ dev_stage = cdk.Stage(
 ApikeyserviceStack(
     prod_stage,
     "ApiKeyServiceStack",
-    stage="Prod",
+    stage="prod",
 )
 
 ApikeyserviceStack(
     dev_stage,
     "ApiKeyServiceStack",
-    stage="Dev",
+    stage="dev",
 )
 
 app.synth()
