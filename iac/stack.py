@@ -16,15 +16,24 @@ class ApikeyserviceStack(Stack):
             f"ApiKeyTable{stage}",
             table_name=f"ApiKeyTable{stage}",
             partition_key=aws_dynamodb.Attribute(
-                name="pk", type=aws_dynamodb.AttributeType.STRING
+                name="pk",
+                type=aws_dynamodb.AttributeType.STRING,
             ),
             sort_key=aws_dynamodb.Attribute(
-                name="sk", type=aws_dynamodb.AttributeType.STRING
+                name="sk",
+                type=aws_dynamodb.AttributeType.STRING,
             ),
         )
 
-        api_gateway = ApiGatewayStack(self, "ApiKeyService", stage=stage)
+        api_gateway = ApiGatewayStack(
+            self,
+            "ApiKeyService",
+            stage=stage,
+        )
 
         ApiKeyServiceRouter(
-            self, "ApiRouter", stage=stage, api_gateway=api_gateway
+            self,
+            "ApiRouter",
+            stage=stage,
+            api_gateway=api_gateway,
         )
