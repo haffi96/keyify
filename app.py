@@ -13,6 +13,7 @@ prod_stage = cdk.Stage(
         account=settings.account,
         region=settings.region,
     ),
+    stage_name="prod",
 )
 
 dev_stage = cdk.Stage(
@@ -22,6 +23,7 @@ dev_stage = cdk.Stage(
         account=settings.account,
         region=settings.region,
     ),
+    stage_name="dev",
 )
 
 ApikeyserviceStack(
