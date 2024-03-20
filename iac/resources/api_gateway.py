@@ -14,23 +14,12 @@ class ApiGatewayStack(aws_apigateway.RestApi):
             deploy=True,
             cloud_watch_role=True,
             deploy_options=aws_apigateway.StageOptions(
-                stage_name=stage,
+                stage_name=stage.lower(),
                 logging_level=aws_apigateway.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
                 metrics_enabled=True,
                 tracing_enabled=True,
             ),
-            # deploy_options=aws_apigateway.StageOptions(
-            #     access_log_destination=aws_apigateway.LogGroupLogDestination(
-            #         LogGroup(
-            #             self,
-            #             f"ApiGatewayLogGroup{stage}",
-            #             log_group_name=f"ApiGatewayLogGroup{stage}",
-            #             removal_policy=RemovalPolicy.DESTROY,
-            #             retention=RetentionDays.ONE_MONTH,
-            #         )
-            #     ),
-            # ),
         )
 
     def add_lambda_integration(

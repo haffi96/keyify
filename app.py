@@ -8,34 +8,34 @@ app = cdk.App()
 
 prod_stage = cdk.Stage(
     app,
-    "prod-env",
+    "Prod",
     env=cdk.Environment(
         account=settings.account,
         region=settings.region,
     ),
-    stage_name="prod",
+    stage_name="Prod",
 )
 
 dev_stage = cdk.Stage(
     app,
-    "dev-env",
+    "Dev",
     env=cdk.Environment(
         account=settings.account,
         region=settings.region,
     ),
-    stage_name="dev",
+    stage_name="Dev",
 )
 
 ApikeyserviceStack(
     prod_stage,
     "ApiKeyServiceStack",
-    stage="prod",
+    stage=prod_stage.stage_name,
 )
 
 ApikeyserviceStack(
     dev_stage,
     "ApiKeyServiceStack",
-    stage="dev",
+    stage=dev_stage.stage_name,
 )
 
 app.synth()
