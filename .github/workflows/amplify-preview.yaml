@@ -1,6 +1,7 @@
 name: 'Amplify PR Preview'
 on:
   pull_request_target:
+    types: [opened, reopened]
 
 jobs:
   deploy:
@@ -8,20 +9,9 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - name: set branchname env
-      id: setenvname
-      run: |
-        # use GITHUB_HEAD_REF that is set to PR source branch
-        echo "##[set-output name=setbranchname;]$(echo ${GITHUB_HEAD_REF})"
-
-    - name: deploy PR preview
-      uses: yinlinchen/amplify-preview-actions@master
+    - name: Comment PR preview URL
+      uses: thollander/actions-comment-pull-request@v2
       with:
-        branch_name: ${{ steps.setenvname.outputs.setbranchname }}
-        amplify_command: deploy
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.PR_PREVIEW_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.PR_PREVIEW_AWS_SECRET_ACCESS_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AmplifyAppId: ${{ secrets.AMPLIFYAPPID }}
-        AWS_REGION: 'eu-west-2'
+        message: |
+          Preview build: https://${{ github.head_ref }}.${{ secrets.AMPLIFYAPPID }}.amplifyapp.com/
+        comment_tag: preview_comment_tag
