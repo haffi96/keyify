@@ -5,7 +5,7 @@ applications:
       variables:
         TEST: foo
     frontend:
-      buildPath: / # Run install and build from the monorepo project root
+      buildPath: ui
       phases:
         preBuild:
           commands:
