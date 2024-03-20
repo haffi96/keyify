@@ -1,0 +1,23 @@
+version: 1
+applications:
+  - appRoot: ui
+    env:
+      variables:
+        TEST: foo
+    frontend:
+      buildPath: / # Run install and build from the monorepo project root
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+            - '**/*'
+        discard-paths: yes
+      cache:
+        paths:
+            - node_modules/**/*
