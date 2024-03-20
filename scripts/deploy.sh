@@ -44,15 +44,15 @@ function cdkDeploy() {
         CDK_ACCOUNT=000000000000 cdklocal bootstrap
 
         log INFO "Deploying CDK stack to localstack..."
-        CDK_ACCOUNT=000000000000 cdklocal deploy dev-env/ApiKeyServiceStack --require-approval never
+        CDK_ACCOUNT=000000000000 cdklocal deploy Dev/ApiKeyServiceStack --require-approval never
     else
-        cdk deploy $STAGE-env/ApiKeyServiceStack --require-approval never
+        cdk deploy $STAGE/ApiKeyServiceStack --require-approval never
     fi
 
     log INFO "CDK stack deployed successfully!"
 
     log INFO "Cleaning up..."
-    rm -rf dist
+    # rm -rf dist
 }
 
 cdkDeploy

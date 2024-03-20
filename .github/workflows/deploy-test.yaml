@@ -106,4 +106,4 @@ jobs:
           aws-region: "eu-west-2"
 
       - name: Run deploy script
-        run: ./scripts/deploy.sh dev
+        run: ./scripts/deploy.sh Dev
