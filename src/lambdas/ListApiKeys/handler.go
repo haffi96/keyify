@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"schemas"
 	"src"
 	"utils"
 
@@ -45,14 +46,29 @@ func (d *ListApiKeysDeps) handler(ctx context.Context, request events.APIGateway
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error listing API keys: %v", err)), nil
 	}
 
+	respBody := []schemas.GetApiKeyResponse{}
+	for _, key := range keys {
+		respBody = append(respBody, schemas.GetApiKeyResponse{
+			ApiId:  apiId,
+			KeyId:  key.KeyId,
+			Name:   key.Name,
+			Prefix: key.Prefix,
+			Roles:  key.Roles,
+		})
+	}
+
 	// Construct the response
-	keysJson, err := json.Marshal(keys)
+	respBodyJSON, err := json.Marshal(respBody)
 	if err != nil {
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error marshalling keys: %v", err)), nil
 	}
 
+	if len(respBody) == 0 {
+		return utils.HttpErrorResponse(http.StatusNotFound, "No API keys found"), nil
+	}
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       string(keysJson),
+		Body:       string(respBodyJSON),
 	}, nil
 }
