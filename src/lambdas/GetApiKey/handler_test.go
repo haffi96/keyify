@@ -38,7 +38,7 @@ func TestGetApiKeyHandler(t *testing.T) {
 		Prefix: "test_",
 		Roles:  []string{"admin", "user"},
 	}
-	apiKeyId := utils.GenerateKeyId()
+	apiKeyId := utils.GenerateRandomId("key_")
 	db.CreateApiKeyRow(utils.HashString("key_1234"), workspaceId, apiKeyId, req, d.DbClient)
 
 	// Test the handler

@@ -1,6 +1,10 @@
 package schemas
 
 // API response structure
+type CreateApiResponse struct {
+	ApiId string `json:"apiId"`
+}
+
 type CreateKeyResponse struct {
 	ApiId string `json:"apiId"`
 	KeyId string `json:"keyId"`
