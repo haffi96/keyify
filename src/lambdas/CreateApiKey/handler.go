@@ -59,10 +59,16 @@ func (d *CreateApiKeyDeps) handler(ctx context.Context, event events.APIGatewayP
 	hashedKey := utils.HashString(apiKey)
 
 	// Create key ID
-	keyId := utils.GenerateKeyId()
+	keyId := utils.GenerateRandomId("key_")
 
 	// Create ApiKey struct
 	apiKeyToAdd, err := db.CreateApiKeyRow(hashedKey, workspaceId, keyId, req, d.DbClient)
+	if err != nil {
+		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error adding key to DynamoDB: %s", err.Error())), nil
+	}
+
+	// Create ApiKeyDatetime struct
+	_, err = db.CreateApiKeyDatetimeRow(hashedKey, workspaceId, keyId, req, d.DbClient)
 	if err != nil {
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error adding key to DynamoDB: %s", err.Error())), nil
 	}

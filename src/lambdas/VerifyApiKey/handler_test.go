@@ -39,7 +39,7 @@ func TestVerifyApiKeyHandler(t *testing.T) {
 		Prefix: "test_",
 		Roles:  []string{"admin", "user"},
 	}
-	apiKeyId := utils.GenerateKeyId()
+	apiKeyId := utils.GenerateRandomId("key_")
 	apiKey, _ := utils.GenerateApiKey(req.Prefix)
 	db.CreateHashedKeyRow(utils.HashString(apiKey), workspaceId, apiKeyId, req, d.DbClient)
 

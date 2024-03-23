@@ -1,6 +1,10 @@
 package schemas
 
 // API request structure
+type CreateApiRequest struct {
+	Name string `json:"name"`
+}
+
 type CreateKeyRequest struct {
 	ApiId  string   `json:"apiId"`
 	Name   string   `json:"name,omitempty"`

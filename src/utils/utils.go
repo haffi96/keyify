@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	mathRand "math/rand"
+	"time"
 )
 
 func GenerateRandomBytes(n int) ([]byte, error) {
@@ -24,10 +25,7 @@ func HashString(str string) string {
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
 
-func GenerateKeyId() string {
-	// Prefix to append to the random string
-	prefix := "key_"
-
+func GenerateRandomId(prefix string) string {
 	// Length of the random string (excluding prefix)
 	randomStringLength := 16
 
@@ -55,4 +53,9 @@ func GenerateApiKey(preifx string) (string, error) {
 	}
 	apiKeyString := base64.URLEncoding.EncodeToString(apiKeyBytes)
 	return fmt.Sprintf("%s%s", preifx, apiKeyString), nil
+}
+
+// TimeNow returns the current time formatted as a string in RFC3339 format.
+func TimeNow() string {
+	return time.Now().Format(time.RFC3339)
 }
