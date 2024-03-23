@@ -1,23 +1,40 @@
 package main
 
 import (
+	"cfg"
 	"context"
+	"db"
 	"encoding/json"
+	"fmt"
 	"schemas"
 	"testing"
+	"time"
 	"utils"
 
-	"cfg"
-	"db"
-
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetApiKeyHandler(t *testing.T) {
+func createApiKeyRows(workspaceId string, apiId string, dbClient *dynamodb.Client) {
+	// Create a test API key
+	req := schemas.CreateKeyRequest{
+		ApiId:  apiId,
+		Name:   gofakeit.FirstName() + "'s test key",
+		Prefix: "test_",
+		Roles:  []string{"admin", "user"},
+	}
+	apiKeyId := utils.GenerateRandomId("key_")
+	hashedKey := utils.HashString(gofakeit.Word())
+	db.CreateApiKeyRow(hashedKey, workspaceId, apiKeyId, req, dbClient)
+	db.CreateApiKeyDatetimeRow(hashedKey, workspaceId, apiKeyId, req, dbClient)
+	db.CreateHashedKeyRow(hashedKey, workspaceId, apiKeyId, req, dbClient)
+}
+
+func TestListApiKeysHandler(t *testing.T) {
 	ctx := context.Background()
-	d := GetApiKeyDeps{
+	d := ListApiKeysDeps{
 		DbClient:  db.GetMockDynamoClient(ctx),
 		TableName: cfg.Config.ApiKeyTable,
 	}
@@ -31,15 +48,12 @@ func TestGetApiKeyHandler(t *testing.T) {
 	}
 	db.CreateRootKeyRow(hashedKey, rootKeyReq, d.DbClient)
 
-	// Create a test API key
-	req := schemas.CreateKeyRequest{
-		ApiId:  "api_" + gofakeit.UUID(),
-		Name:   gofakeit.FirstName() + "'s test key",
-		Prefix: "test_",
-		Roles:  []string{"admin", "user"},
+	// Create a 3 test API keys
+	apiId := fmt.Sprintf("api_%s", gofakeit.UUID())
+	for i := 0; i < 3; i++ {
+		time.Sleep(time.Millisecond * 100)
+		createApiKeyRows(workspaceId, apiId, d.DbClient)
 	}
-	apiKeyId := utils.GenerateRandomId("key_")
-	db.CreateApiKeyRow(utils.HashString("key_1234"), workspaceId, apiKeyId, req, d.DbClient)
 
 	// Test the handler
 	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
@@ -47,8 +61,7 @@ func TestGetApiKeyHandler(t *testing.T) {
 			"Authorization": "Bearer " + rootKey,
 		},
 		QueryStringParameters: map[string]string{
-			"apiId":    req.ApiId,
-			"apiKeyId": apiKeyId,
+			"apiId": apiId,
 		},
 	})
 
@@ -56,16 +69,14 @@ func TestGetApiKeyHandler(t *testing.T) {
 	assert.Equal(t, nil, err, "Handler returned an error")
 	assert.Equal(t, 200, resp.StatusCode, "Expected status code 200")
 
-	var result map[string]interface{}
+	var result []map[string]interface{}
 	err = json.Unmarshal([]byte(resp.Body), &result)
+
 	if err != nil {
 		t.Fatalf("Unable to parse response body: %v", err)
 	}
 
-	assert.Equal(t, apiKeyId, result["apiKeyId"], "Expected keyId to be key_1234")
-	assert.Equal(t, req.ApiId, result["apiId"], "Expected apiId to be api-1234")
-	assert.Equal(t, req.Name, result["name"], "Expected name to be my test key")
-	assert.Equal(t, "test_", result["prefix"], "Expected prefix to be test_")
-	assert.Equal(t, []interface{}{"admin", "user"}, result["roles"], "Expected roles to be [admin, user]")
+	keysList := len(result)
 
+	assert.Equal(t, 3, keysList, "Expected 3 keys in the list")
 }

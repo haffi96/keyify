@@ -17,6 +17,7 @@ class GenericGoLambdaFunction(aws_lambda.Function):
             f"{construct_id}Lambda",
             runtime=aws_lambda.Runtime.PROVIDED_AL2,
             architecture=aws_lambda.Architecture.ARM_64,
+            memory_size=1024,
             handler="bootstrap",
             code=code_source,
             initial_policy=[

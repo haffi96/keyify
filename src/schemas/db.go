@@ -45,6 +45,10 @@ type GetApiKeyInput struct {
 	KeyId            string `json:"apiKeyId" dynamodbav:"sk"`
 }
 
+type ListApiKeysInput struct {
+	WorkspaceIdApiId string `json:"workspaceIdApiId" dynamodbav:"pk"`
+}
+
 type RootKeyRow struct {
 	RootKeyHash string   `json:"rootKeyHash" dynamodbav:"pk"`
 	WorkspaceId string   `json:"workspaceId" dynamodbav:"sk"`
