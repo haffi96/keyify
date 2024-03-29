@@ -42,7 +42,7 @@ func TestListApiKeysHandler(t *testing.T) {
 	// Create rootKey row for testing
 	rootKey, _ := utils.GenerateApiKey("apikeyservice_")
 	hashedKey := utils.HashString(rootKey)
-	workspaceId := "workspace-2"
+	workspaceId := fmt.Sprintf("workspace-%s", gofakeit.UUID())
 	rootKeyReq := schemas.CreateRootKeyRequest{
 		WorkspaceId: workspaceId,
 	}

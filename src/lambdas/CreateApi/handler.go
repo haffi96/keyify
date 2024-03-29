@@ -50,7 +50,7 @@ func (d *CreateApiDeps) handler(ctx context.Context, event events.APIGatewayProx
 	apiId := utils.GenerateRandomId("api_")
 
 	// Create the API
-	apiToAdd, err := db.CreateApiRow(workspaceId, apiId, d.DbClient)
+	apiToAdd, err := db.CreateApiRow(workspaceId, apiId, req.Name, d.DbClient)
 
 	if err != nil {
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error creating API: %s", err.Error())), nil

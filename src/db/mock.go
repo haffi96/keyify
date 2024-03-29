@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"cfg"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 func GetMockDynamoClient(ctx context.Context) *dynamodb.Client {
@@ -34,4 +36,23 @@ func GetMockDynamoClient(ctx context.Context) *dynamodb.Client {
 	client := dynamodb.NewFromConfig(cfg)
 
 	return client
+}
+
+func DeleteAllDbItems(ctx context.Context, dbClient *dynamodb.Client) {
+	// Scan all items
+	items, err := dbClient.Scan(context.TODO(), &dynamodb.ScanInput{
+		TableName: aws.String(cfg.Config.ApiKeyTable),
+	})
+
+	if err != nil {
+		fmt.Printf("Error scanning table: %v", err)
+	}
+
+	// Delete all items
+	for _, item := range items.Items {
+		_, _ = dbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+			TableName: aws.String(cfg.Config.ApiKeyTable),
+			Key:       map[string]types.AttributeValue{"pk": item["pk"], "sk": item["sk"]},
+		})
+	}
 }

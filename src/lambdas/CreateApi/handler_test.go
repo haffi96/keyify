@@ -11,6 +11,7 @@ import (
 	"utils"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +26,7 @@ func TestCreateApiHandler(t *testing.T) {
 	rootKey, _ := utils.GenerateApiKey("apikeyservice_")
 	hashedKey := utils.HashString(rootKey)
 	rootKeyReq := schemas.CreateRootKeyRequest{
-		WorkspaceId: "workspace-1",
+		WorkspaceId: fmt.Sprintf("workspace-%s", gofakeit.UUID()),
 	}
 	db.CreateRootKeyRow(hashedKey, rootKeyReq, d.DbClient)
 

@@ -4,6 +4,7 @@ import (
 	"cfg"
 	"context"
 	"errors"
+	"log"
 	"schemas"
 	"utils"
 
@@ -40,7 +41,7 @@ func CreateRootKeyRow(hashedRootKey string, req schemas.CreateRootKeyRequest, db
 }
 
 func GetRootKeyRow(rootKeyHash string, dbClient *dynamodb.Client) (schemas.RootKeyRow, error) {
-
+	log.Println("rootKeyHash: ", rootKeyHash)
 	// Get item from DynamoDB
 	getRootKeyInput := &dynamodb.QueryInput{
 		TableName:              aws.String(cfg.Config.ApiKeyTable),
@@ -53,6 +54,9 @@ func GetRootKeyRow(rootKeyHash string, dbClient *dynamodb.Client) (schemas.RootK
 	if err != nil {
 		return schemas.RootKeyRow{}, err
 	}
+
+	log.Println("getRootKeyOutput: ", getRootKeyOutput)
+	log.Println("getRootKeyOutput.Items: ", getRootKeyOutput.Items)
 
 	if len(getRootKeyOutput.Items) == 0 {
 		return schemas.RootKeyRow{}, errors.New("root key invalid")

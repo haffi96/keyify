@@ -39,3 +39,11 @@ go build -o main main.go
 ```bash
 gofmt -s -w .
 ```
+
+
+
+DOMAINS:
+
+- keycharm.io
+- keyify.io
+- keylite.io
