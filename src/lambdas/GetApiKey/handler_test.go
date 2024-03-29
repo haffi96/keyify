@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"schemas"
 	"testing"
 	"utils"
@@ -25,7 +26,7 @@ func TestGetApiKeyHandler(t *testing.T) {
 	// Create rootKey row for testing
 	rootKey, _ := utils.GenerateApiKey("apikeyservice_")
 	hashedKey := utils.HashString(rootKey)
-	workspaceId := "workspace-2"
+	workspaceId := fmt.Sprintf("workspace-%s", gofakeit.UUID())
 	rootKeyReq := schemas.CreateRootKeyRequest{
 		WorkspaceId: workspaceId,
 	}

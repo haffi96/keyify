@@ -62,6 +62,7 @@ type GetRootKeyInput struct {
 
 type ApiRow struct {
 	WorkspaceId string `json:"workspaceId" dynamodbav:"pk"`
+	ApiName     string `json:"apiName" dynamodbav:"apiName"`
 	ApiId       string `json:"apiId" dynamodbav:"sk"`
 	CreatedAt   string `json:"createdAt" dynamodbav:"createdAt"`
 }

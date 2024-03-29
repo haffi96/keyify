@@ -49,11 +49,12 @@ func (d *ListApiKeysDeps) handler(ctx context.Context, request events.APIGateway
 	respBody := []schemas.GetApiKeyResponse{}
 	for _, key := range keys {
 		respBody = append(respBody, schemas.GetApiKeyResponse{
-			ApiId:  apiId,
-			KeyId:  key.KeyId,
-			Name:   key.Name,
-			Prefix: key.Prefix,
-			Roles:  key.Roles,
+			ApiId:     apiId,
+			KeyId:     key.KeyId,
+			Name:      key.Name,
+			Prefix:    key.Prefix,
+			Roles:     key.Roles,
+			CreatedAt: key.CreatedAt,
 		})
 	}
 

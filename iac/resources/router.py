@@ -25,6 +25,7 @@ class ApiKeyServiceRouter(Construct):
             ("VerifyApiKey", "/verifyKey", "POST", "verify an api key in db"),
             ("CreateApi", "/api", "POST", "create an api in db"),
             ("ListApiKeys", "/keys", "GET", "list all api keys for an api"),
+            ("ListApis", "/apis", "GET", "list all apis for a user"),
         ]:
             lambda_function = GenericGoLambdaFunction(
                 self,
