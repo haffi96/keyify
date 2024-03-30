@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { SignInButton } from "@/components/signInButton";
 
 export default async function Home() {
