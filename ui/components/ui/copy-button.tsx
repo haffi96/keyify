@@ -63,7 +63,7 @@ export function CopyToClipboardButton({
 
 export function ButtonWithCopy({ text, className }: { text: string, className?: string }) {
   return (
-    <div className={cn("flex w-max flex-row items-center space-x-2 rounded bg-zinc-900 p-2 text-white", className)}>
+    <div className={cn("flex w-max flex-row items-center space-x-2 rounded bg-zinc-900 p-2 ", className)}>
       <p>{text}</p>
       <CopyToClipboardButton value={text} />
     </div>
