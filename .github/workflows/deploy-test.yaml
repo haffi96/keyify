@@ -35,7 +35,7 @@ jobs:
     env:
       CDK_REGION: eu-west-2
       CDK_ACCOUNT: 000000000000
-      STACK_NAME: dev-env/ApiKeyServiceStac
+      STACK_NAME: dev-env/ApiKeyServiceStack
     steps:
       - uses: actions/checkout@v4
       - name: Start LocalStack

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -37,7 +38,7 @@ func TestCreateRootKeyHandler(t *testing.T) {
 	key := result["rootKey"].(string)
 	keyParts := strings.SplitN(key, "_", 2)
 	keyPrefix := keyParts[0] + "_"
-	assert.Equal(t, "apikeyservice_", keyPrefix, "Expected key prefix to be 'apikeyservice_'")
+	assert.Equal(t, cfg.Config.RootKeyPrefix, keyPrefix, fmt.Sprintf("Expected key prefix to be '%s'", cfg.Config.RootKeyPrefix))
 
 	if _, ok := result["rootKey"]; !ok {
 		t.Errorf("Expected 'keyId' in response body, but not found")
