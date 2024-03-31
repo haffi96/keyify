@@ -40,7 +40,7 @@ func (d *CreateRootKeyDeps) handler(ctx context.Context, event events.APIGateway
 	// ... Add more validations as needed
 
 	// Generate random API key
-	rootKey, err := utils.GenerateApiKey("apikeyservice_")
+	rootKey, err := utils.GenerateApiKey(cfg.Config.RootKeyPrefix)
 	if err != nil {
 		return utils.HttpErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Error generating api key: %s", err.Error())), nil
 	}

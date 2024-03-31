@@ -51,7 +51,7 @@ function cdkDeploy() {
 
     log INFO "CDK stack deployed successfully!"
 
-    log INFO "Cleaning up..."
+    # log INFO "Cleaning up..."
     # rm -rf dist
 }
 
