@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { WorkOS, type User } from '@workos-inc/node';
+import { WorkOS } from '@workos-inc/node';
 import { redirect } from 'next/navigation';
+import { sealData, unsealData } from 'iron-session';
 
 export const workos = new WorkOS(process.env.WORKOS_API_KEY);
 
@@ -24,40 +25,18 @@ export async function verifyJwtToken(token: string) {
   }
 }
 
-// Verify the JWT and return the user
-export async function getUser(): Promise<{
-  isAuthenticated: boolean;
-  user?: User | null;
-}> {
-  const token = cookies().get('token')?.value;
-
-  if (token) {
-    const verifiedToken = await verifyJwtToken(token);
-    if (verifiedToken) {
-      return {
-        isAuthenticated: true,
-        user: verifiedToken.user as User | null,
-      };
-    }
-  }
-
-  return { isAuthenticated: false };
-}
-
 export async function getAccessToken(): Promise<string | undefined> {
   return cookies().get('token')?.value;
 }
 
 export async function getRootKey(): Promise<string | undefined> {
-  return cookies().get('rootKey')?.value;
-}
+  const key = cookies().get('keyify-auth')?.value;
+  if (key) {
+    return unsealData(key, {
+      password: process.env.ROOTKEY_PASSWORD as string,
+    });
+  }
 
-export async function getAuthUrl() {
-  return workos.sso.getAuthorizationUrl({
-    clientId: process.env.WORKOS_CLIENT_ID || '',
-    provider: 'authkit',
-    redirectUri: process.env.WORKOS_REDIRECT_URI!,
-  });
 }
 
 export async function clearCookie() {

@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-export function GET(request: Request) {
-  const url = new URL(request.url);
-  url.pathname = '/';
+export async function GET(_: Request) {
+  cookies().delete("wos-session");
+  cookies().delete('keyify-auth');
 
-  const response = NextResponse.redirect(url);
-
-  cookies().delete('token');
-  cookies().delete('rootKey');
-
-  return response;
+  return new NextResponse(JSON.stringify({
+    "message": "Logged out successfully."
+  }), {
+    status: 200,
+  });
 }

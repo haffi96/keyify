@@ -36,6 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CreateNewKeySheet } from "@/components/newKeySheet";
 
 export type ApiKeys = {
   apiId: string;
@@ -81,7 +82,7 @@ export const columns: ColumnDef<ApiKeys>[] = [
     cell: ({ row }) => {
       const apiKeyId = row.getValue("apiKeyId") as string;
       const formatted = apiKeyId.split("apiKeyId#")[1];
-      return <ButtonWithCopy className="bg-zinc-800" text={formatted} />
+      return <ButtonWithCopy className="bg-zinc-400 dark:bg-zinc-900" text={formatted} />
     },
   },
   {
@@ -129,7 +130,7 @@ export const columns: ColumnDef<ApiKeys>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0 dark:hover:bg-zinc-900">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
@@ -188,8 +189,13 @@ export function DataTable(dataTableProps: DataTableProps) {
   });
 
   return (
-    <div className="w-full">
-      <ButtonWithCopy text={data[0].apiId} />
+    <div className="w-full text-black dark:text-white">
+      <div className="flex flex-row space-x-2 b">
+        {
+          data[0] && <ButtonWithCopy className="bg-zinc-400 dark:bg-zinc-900 text-black dark:text-white" text={data[0].apiId} />
+        }
+        <CreateNewKeySheet />
+      </div>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter keys..."
@@ -203,7 +209,7 @@ export function DataTable(dataTableProps: DataTableProps) {
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="ml-auto bg-zinc-400 dark:hover:bg-zinc-900 dark:bg-zinc-900">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -228,14 +234,14 @@ export function DataTable(dataTableProps: DataTableProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table className="text-white">
-          <TableHeader>
+      <div className="rounded-md border border-black/25 dark:border-white/25">
+        <Table>
+          <TableHeader className="border border-black/25 dark:border-white/25">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead className="text-black dark:text-white border-b border-b-black/25 dark:border-white/25" key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -248,10 +254,11 @@ export function DataTable(dataTableProps: DataTableProps) {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="border border-black/25 dark:border-white/25">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  className="border border-black/25 dark:border-white/25"
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >

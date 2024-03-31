@@ -1,60 +1,12 @@
 "use client";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { BellIcon } from "lucide-react";
-import { useState } from "react";
-import { CommandDemo } from "@/components/ui/command-demo";
-import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Header() {
-  const [notifications, setNotifications] = useState<any>([
-    {
-      text: "This is a notification",
-      date: "02-01-2015",
-      read: true,
-    },
-    {
-      text: "This is another notification",
-      date: "02-01-2015",
-      read: false,
-    },
-  ]);
-
   return (
-    <div className="grid w-full grid-cols-2 gap-4 border-b p-4">
-      <CommandDemo />
-      <div className="flex items-center justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="relative" variant="outline" size="icon">
-              <div
-                className={`absolute -right-1 -top-2 my-1 h-3 w-3 rounded-full ${notifications.find((x: any) => x.read === true) ? "bg-green-500" : "bg-neutral-200"}`}
-              ></div>
-              <BellIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {notifications.map((item: any, key: number) => (
-              <DropdownMenuItem
-                key={key}
-                className="flex cursor-pointer items-start gap-2 px-3 py-2 transition hover:bg-neutral-50"
-              >
-                <div
-                  className={`my-1 h-3 w-3 rounded-full ${!item.read ? "bg-green-500" : "bg-neutral-200"}`}
-                ></div>
-                <div>
-                  <p>{item.text}</p>
-                  <p className="text-xs text-neutral-500">{item.date}</p>
-                </div>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className="flex w-full gap-4 border-b-black/25 dark:border-b-white/25 dark:border-b-1 border-b p-4">
+      <div className="ml-auto">
+        <ThemeToggle />
       </div>
     </div>
   );

@@ -8,8 +8,8 @@ interface Api {
 }
 
 async function getApis(): Promise<Api[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const rootKey = await getRootKey();
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const response = await fetch(`${baseUrl}/apis`, {
     method: "GET",
@@ -28,8 +28,12 @@ async function getApis(): Promise<Api[]> {
   return respJson;
 }
 
-export default async function apisPage() {
+export default async function ApisPage() {
   const apis = await getApis();
+
+  if (!apis) {
+    return <div>No APIs found</div>;
+  }
 
 
   return (
@@ -39,7 +43,7 @@ export default async function apisPage() {
           <Link key={api.apiId} href={`/apis/${api.apiId}`}>
             <div
               key={api.apiId}
-              className="cursor-pointer rounded-lg bg-gray-200 p-10 hover:bg-gray-300"
+              className="cursor-pointer rounded-lg bg-zinc-300 shadow-sm shadow-black/50 hover:ring-opacity-50 hover:ring-1 hover:ring-black dark:text-white dark:bg-zinc-900 p-10 dark:hover:ring-white dark:hover:ring-1 dark:hover:ring-opacity-50"
             >
               {api.apiName}
             </div>
