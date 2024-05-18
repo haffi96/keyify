@@ -40,7 +40,11 @@ func TestGetApiKeyHandler(t *testing.T) {
 		Roles:  []string{"admin", "user"},
 	}
 	apiKeyId := utils.GenerateRandomId("key_")
-	db.CreateApiKeyRow(utils.HashString("key_1234"), workspaceId, apiKeyId, req, d.DbClient)
+	apiKey, err := db.CreateApiKeyRow(utils.HashString("key_1234"), workspaceId, apiKeyId, req, d.DbClient)
+
+	if err != nil {
+		t.Fatalf("Unable to create api key")
+	}
 
 	// Test the handler
 	resp, err := d.handler(ctx, events.APIGatewayProxyRequest{
@@ -67,6 +71,7 @@ func TestGetApiKeyHandler(t *testing.T) {
 	assert.Equal(t, req.ApiId, result["apiId"], "Expected apiId to be api-1234")
 	assert.Equal(t, req.Name, result["name"], "Expected name to be my test key")
 	assert.Equal(t, "test_", result["prefix"], "Expected prefix to be test_")
+	assert.Equal(t, apiKey.CreatedAt, result["createdAt"], "Expected createdAt to be the same")
 	assert.Equal(t, []interface{}{"admin", "user"}, result["roles"], "Expected roles to be [admin, user]")
 
 }

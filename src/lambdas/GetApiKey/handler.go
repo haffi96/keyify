@@ -51,11 +51,12 @@ func (d *GetApiKeyDeps) handler(ctx context.Context, request events.APIGatewayPr
 	}
 
 	respBody := schemas.GetApiKeyResponse{
-		ApiId:  apiId,
-		KeyId:  keyId,
-		Name:   apiKeyData.Name,
-		Prefix: apiKeyData.Prefix,
-		Roles:  apiKeyData.Roles,
+		ApiId:     apiId,
+		KeyId:     keyId,
+		Name:      apiKeyData.Name,
+		Prefix:    apiKeyData.Prefix,
+		Roles:     apiKeyData.Roles,
+		CreatedAt: apiKeyData.CreatedAt,
 	}
 	respBodyJSON, err := json.Marshal(respBody)
 

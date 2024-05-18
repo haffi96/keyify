@@ -16,3 +16,5 @@ creds.txt
 dist
 
 .env*
+
+axiom_logger
